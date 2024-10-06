@@ -25,6 +25,13 @@ struct Board{
             }
         }
     }
+    void list(){
+        cout << "All shapes:\n";
+        cout << "Triangle: input x, y, height\n";
+        cout << "Circle: input x, y, radius\n";
+        cout << "Square: input x, y, lenght\n";
+        cout << "Line: input x, y, lenght\n";
+    }
     void save(){ //implementation was taken from previous task(programming paradigms)
         cout << "Enter file name to save: ";
         string filename;
@@ -194,6 +201,9 @@ int main() {
         }
         else if (command == "load"){
             board.load();
+        }
+        else if (command == "list"){
+            board.list();
         }
         else{
             cout << "Invalid" << endl;
