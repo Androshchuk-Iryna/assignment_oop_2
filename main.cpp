@@ -18,7 +18,11 @@ struct Board{
         }
     }
     void clear(){
-
+        for (auto& row : grid) {
+            for (char& c : row) {
+                c = ' ';
+            }
+        }
     }
 };
 
@@ -69,14 +73,48 @@ class Line: public Shape{
 
 
 
-
-// Struct to define the board
-
-
 int main() {
     Board board;
     Triangle triangle;
-    triangle.draw(board,10, 1, 10);
-    board.print();
-    return 0;
+
+    int x,y, size;
+    string shapeTipe;
+    string command;
+
+    while (true){
+        cout << "Enter command (add, draw, clear, exit): ";
+        cin >> command;
+
+        if (command == "add"){
+            cin >> shapeTipe >> x >> y >> size;
+            if (shapeTipe == "triangle"){
+                triangle.draw(board, x, y, size);
+            }
+            else if (shapeTipe == "circle"){
+
+            }
+            else if (shapeTipe == "triangle"){
+
+            }
+            else if (shapeTipe == "triangle"){
+
+            }
+            else if (shapeTipe == "triangle"){
+
+            }
+
+        }
+        else if (command == "draw"){
+            board.print();
+        }
+        else if (command == "clear"){
+            board.clear();
+        }
+        else{
+            cout << "Invalid" << endl;
+        }
+
+    }
 }
+
+//add triangle 10 5 4
