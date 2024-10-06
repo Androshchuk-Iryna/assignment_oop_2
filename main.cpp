@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -24,11 +25,48 @@ struct Board{
             }
         }
     }
+    void save(){ //implementation was taken from previous task(programming paradigms)
+        cout << "Enter file name to save: ";
+        string filename;
+        cin >> filename;
+
+        ofstream file(filename);
+        if (!file.is_open()) {
+            cout << "Error opening file\n";
+            return;
+
+        }
+        for (auto& row : grid) {
+            for (char c : row) {
+                file << c;
+            }
+            file << '\n';
+        }
+        file.close();
+    }
+    void load(){
+        cout << "Enter file name to save: ";
+        string filename;
+        cin >> filename;
+
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "Error opening file\n";
+            return;
+        }
+        string line;
+        int row = 0;
+        while (getline(file, line) && row < BOARD_HEIGHT) {
+            for (int col = 0; col < line.size() && col < BOARD_WIDTH; ++col) {
+                grid[row][col] = line[col];
+            }
+            row++;
+        }
+
+        file.close();
+    }
 };
 
-class Draw{
-
-};
 
 class Shape{
 public:
@@ -150,6 +188,12 @@ int main() {
         }
         else if (command == "clear"){
             board.clear();
+        }
+        else if (command == "save"){
+            board.save();
+        }
+        else if (command == "load"){
+            board.load();
         }
         else{
             cout << "Invalid" << endl;
