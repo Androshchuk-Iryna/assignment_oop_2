@@ -62,13 +62,54 @@ public:
     }
 };
 class Circle: public Shape{
+public:
+    void draw(Board& board, int x, int y, int radius) const override {
+        if (radius <= 0) return;
+        float dist;
 
+        for (int i = 0; i <= 2 * radius; i++) {
+            for (int j = 0; j <= 2 * radius; ++j) {
+                dist = sqrt((i - radius) * (i - radius) +
+                            (j - radius) * (j - radius));
+
+                if (dist > radius - 0.5 && dist < radius + 0.5) {
+                    int boardX = x - radius + j;
+                    int boardY = y - radius + i;
+                    if (boardX >= 0 && boardX < BOARD_WIDTH && boardY >= 0 && boardY < BOARD_HEIGHT) {
+                        board.grid[boardY][boardX] = '*';
+                    }
+                }
+            }
+        }
+    }
 };
 class Square: public Shape{
+public:
+    void draw(Board& board, int x, int y, int lenght) const override {
+        if (lenght <= 0) return;
+        for (int i = 0; i < lenght; ++i) {
+            if (x + i < BOARD_WIDTH && y + i < BOARD_HEIGHT) {
+                board.grid[y][x + i] = '*';
+                board.grid[y + lenght - 1][x + i] = '*';
+            }
+            if (y + i < BOARD_HEIGHT && x + i < BOARD_WIDTH) {
+                board.grid[y + i][x] = '*';
+                board.grid[y + i][x + lenght - 1] = '*';
+            }
+        }
+    }
 
 };
 class Line: public Shape{
-
+public:
+    void draw(Board& board, int x, int y, int lenght) const override {
+        if (lenght <= 0) return;
+        for (int i = 0; i < lenght; ++i){
+            if (x + i < BOARD_WIDTH && y < BOARD_HEIGHT) {
+                board.grid[y+i][x + i] = '*';
+            }
+        }
+    }
 };
 
 
@@ -76,6 +117,9 @@ class Line: public Shape{
 int main() {
     Board board;
     Triangle triangle;
+    Circle circle;
+    Square square;
+    Line line;
 
     int x,y, size;
     string shapeTipe;
@@ -91,16 +135,13 @@ int main() {
                 triangle.draw(board, x, y, size);
             }
             else if (shapeTipe == "circle"){
-
+                circle.draw(board, x, y, size);
             }
-            else if (shapeTipe == "triangle"){
-
+            else if (shapeTipe == "square"){
+                square.draw(board, x, y, size);
             }
-            else if (shapeTipe == "triangle"){
-
-            }
-            else if (shapeTipe == "triangle"){
-
+            else if (shapeTipe == "line"){
+                line.draw(board, x, y, size);
             }
 
         }
@@ -117,4 +158,7 @@ int main() {
     }
 }
 
-//add triangle 10 5 4
+//add triangle 10 5 5
+//add circle 10 10 5
+//add square 10 10 10
+// add line 10 10 10
