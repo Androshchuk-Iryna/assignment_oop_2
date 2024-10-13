@@ -6,6 +6,14 @@ using namespace std;
 
 const int BOARD_WIDTH = 80;
 const int BOARD_HEIGHT = 25;
+
+struct ShapeDate{
+    string name;
+    int x, y, z;
+    int id;
+
+};
+
 struct Board{
     vector<vector<char>> grid;
     Board() : grid(BOARD_HEIGHT, vector<char>(BOARD_WIDTH, ' ')) {}
@@ -25,7 +33,7 @@ struct Board{
             }
         }
     }
-    void list(){
+    void shapes(){
         cout << "All shapes:\n";
         cout << "Triangle: input x, y, height\n";
         cout << "Circle: input x, y, radius\n";
@@ -166,15 +174,19 @@ int main() {
     Square square;
     Line line;
 
+    vector<ShapeDate> shapesList;
+    int shapeID = 0;
+
     int x,y, size;
     string shapeTipe;
     string command;
 
     while (true){
-        cout << "Enter command (add, draw, clear, exit): ";
+        cout << "Enter command (add, draw, clear, save, load, shapes, list, undo, exit): ";
         cin >> command;
 
         if (command == "add"){
+            shapeID++;
             cin >> shapeTipe >> x >> y >> size;
             if (shapeTipe == "triangle"){
                 triangle.draw(board, x, y, size);
@@ -188,6 +200,7 @@ int main() {
             else if (shapeTipe == "line"){
                 line.draw(board, x, y, size);
             }
+            shapesList.push_back({shapeTipe, x, y, size, shapeID});
 
         }
         else if (command == "draw"){
@@ -202,8 +215,15 @@ int main() {
         else if (command == "load"){
             board.load();
         }
+        else if (command == "shapes"){
+            board.shapes();
+        }
         else if (command == "list"){
-            board.list();
+            cout << "List of all added shapes:\n";
+            for (const auto& shape : shapesList) {
+                cout << "ID: " << shape.id << ", Shape: " << shape.name
+                     << ", X: " << shape.x << ", Y: " << shape.y << ", Size: " << shape.z << "\n";
+            }
         }
         else{
             cout << "Invalid" << endl;
