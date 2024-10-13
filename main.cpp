@@ -33,14 +33,11 @@ struct Board{
             }
         }
     }
-    void shapes(){
-        cout << "All shapes:\n";
-        cout << "Triangle: input x, y, height\n";
-        cout << "Circle: input x, y, radius\n";
-        cout << "Square: input x, y, lenght\n";
-        cout << "Line: input x, y, lenght\n";
-    }
-    void save(){ //implementation was taken from previous task(programming paradigms)
+};
+
+class fileMangnment{
+public:
+    static void save(const vector<vector<char>>& grid){ //implementation was taken from previous task(programming paradigms)
         cout << "Enter file name to save: ";
         string filename;
         cin >> filename;
@@ -59,7 +56,8 @@ struct Board{
         }
         file.close();
     }
-    void load(){
+
+    static void load(vector<vector<char>>& grid){
         cout << "Enter file name to save: ";
         string filename;
         cin >> filename;
@@ -209,14 +207,17 @@ int main() {
         else if (command == "clear"){
             board.clear();
         }
-        else if (command == "save"){
-            board.save();
-        }
-        else if (command == "load"){
-            board.load();
+        else if (command == "save") {
+            fileMangnment::save(board.grid);
+        } else if (command == "load") {
+            fileMangnment::load(board.grid);
         }
         else if (command == "shapes"){
-            board.shapes();
+            cout << "All shapes:\n";
+            cout << "Triangle: input x, y, height\n";
+            cout << "Circle: input x, y, radius\n";
+            cout << "Square: input x, y, lenght\n";
+            cout << "Line: input x, y, lenght\n";
         }
         else if (command == "list"){
             cout << "List of all added shapes:\n";
@@ -224,6 +225,28 @@ int main() {
                 cout << "ID: " << shape.id << ", Shape: " << shape.name
                      << ", X: " << shape.x << ", Y: " << shape.y << ", Size: " << shape.z << "\n";
             }
+        }
+        else if(command == "undo"){
+            if(!shapesList.empty()){
+                shapesList.pop_back();
+                board.clear();
+                for (const auto& shape: shapesList){
+                    if (shape.name == "triangle") {
+                        triangle.draw(board, shape.x, shape.y, shape.z);
+                    } else if (shape.name == "circle") {
+                        circle.draw(board, shape.x, shape.y, shape.z);
+                    } else if (shape.name == "square") {
+                        square.draw(board, shape.x, shape.y, shape.z);
+                    } else if (shape.name == "line") {
+                        line.draw(board, shape.x, shape.y, shape.z);
+                    }
+                }
+            } else{
+                cout << "no shapes to delet";
+            }
+        }
+        else if (command == "exit") {
+            return 0;
         }
         else{
             cout << "Invalid" << endl;
