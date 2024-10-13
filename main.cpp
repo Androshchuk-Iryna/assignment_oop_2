@@ -175,7 +175,7 @@ int main() {
     Line line;
 
     vector<ShapeDate> shapesList;
-    int shapeID = 0;
+    int ID = 0;
 
     int x,y, size;
     string shapeTipe;
@@ -186,7 +186,7 @@ int main() {
         cin >> command;
 
         if (command == "add"){
-            shapeID++;
+            ID++;
             cin >> shapeTipe >> x >> y >> size;
             if (shapeTipe == "triangle"){
                 triangle.draw(board, x, y, size);
@@ -200,7 +200,7 @@ int main() {
             else if (shapeTipe == "line"){
                 line.draw(board, x, y, size);
             }
-            shapesList.push_back({shapeTipe, x, y, size, shapeID});
+            shapesList.push_back({shapeTipe, x, y, size, ID});
 
         }
         else if (command == "draw"){
