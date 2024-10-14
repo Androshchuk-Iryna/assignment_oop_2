@@ -9,6 +9,8 @@ const int BOARD_HEIGHT = 25;
 
 struct ShapeDate{
     string name;
+//    string colour;
+//    string filling;
     int x, y, z;
     int id;
 
@@ -83,38 +85,37 @@ public:
 
 class Shape{
 public:
-    virtual void draw(Board& board, int x, int y, int size) const = 0;
+    virtual void draw(Board& board, int x, int y, int size, string fill, char colour) const = 0;
 };
+
 class Triangle: public Shape{
 public:
-    void draw(Board& board, int x, int y, int height) const override {
-
-        if (height <= 0) return; // Ensure the triangle height is positive and sensible
+    void draw(Board& board, int x, int y, int height, string fill, char colour) const override {
+        if (height <= 0) return;
         for (int i = 0; i < height; ++i) {
-            int leftMost = x - i; // Calculate the starting position
-            int rightMost = x + i; // Calculate the ending position
-            int posY = y + i; // Calculate the vertical position
-// Draw only the edges/border of the triangle
+            int leftMost = x - i;
+            int rightMost = x + i;
+            int posY = y + i;
+
             if (posY < BOARD_HEIGHT) {
-                if (leftMost >= 0 && leftMost < BOARD_WIDTH) // Check bounds for left most position
-                    board.grid[posY][leftMost] = '*';
+                if (leftMost >= 0 && leftMost < BOARD_WIDTH)
+                    board.grid[posY][leftMost] = colour;
                 if (rightMost >= 0 && rightMost < BOARD_WIDTH && leftMost != rightMost)
-// Check bounds for right most position
-                    board.grid[posY][rightMost] = '*';
+                    board.grid[posY][rightMost] = colour;
             }
         }
-// Draw the base of the triangle separately
         for (int j = 0; j < 2 * height - 1; ++j) {
             int baseX = x - height + 1 + j;
             int baseY = y + height - 1;
-            if (baseX >= 0 && baseX < BOARD_WIDTH && baseY < BOARD_HEIGHT) // Check bounds for each position on the base
-                board.grid[baseY][baseX] = '*';
+            if (baseX >= 0 && baseX < BOARD_WIDTH && baseY < BOARD_HEIGHT)
+                board.grid[baseY][baseX] = colour;
         }
     }
 };
+
 class Circle: public Shape{
 public:
-    void draw(Board& board, int x, int y, int radius) const override {
+    void draw(Board& board, int x, int y, int radius, string fill, char colour) const override {
         if (radius <= 0) return;
         float dist;
 
@@ -136,7 +137,7 @@ public:
 };
 class Square: public Shape{
 public:
-    void draw(Board& board, int x, int y, int lenght) const override {
+    void draw(Board& board, int x, int y, int lenght, string fill, char colour) const override {
         if (lenght <= 0) return;
         for (int i = 0; i < lenght; ++i) {
             if (x + i < BOARD_WIDTH && y + i < BOARD_HEIGHT) {
@@ -153,7 +154,7 @@ public:
 };
 class Line: public Shape{
 public:
-    void draw(Board& board, int x, int y, int lenght) const override {
+    void draw(Board& board, int x, int y, int lenght, string fill, char colour) const override {
         if (lenght <= 0) return;
         for (int i = 0; i < lenght; ++i){
             if (x + i < BOARD_WIDTH && y < BOARD_HEIGHT) {
@@ -177,6 +178,7 @@ int main() {
 
     int x,y, size;
     string shapeTipe;
+    string colour;
     string command;
 
     while (true){
@@ -185,18 +187,19 @@ int main() {
 
         if (command == "add"){
             ID++;
-            cin >> shapeTipe >> x >> y >> size;
+            cin >> shapeTipe >> colour >> x >> y >> size;
+            char cChar = colour[0];
             if (shapeTipe == "triangle"){
-                triangle.draw(board, x, y, size);
+                triangle.draw(board, x, y, size, "", cChar);
             }
             else if (shapeTipe == "circle"){
-                circle.draw(board, x, y, size);
+                circle.draw(board, x, y, size, "", cChar);
             }
             else if (shapeTipe == "square"){
-                square.draw(board, x, y, size);
+                square.draw(board, x, y, size, "", cChar);
             }
             else if (shapeTipe == "line"){
-                line.draw(board, x, y, size);
+                line.draw(board, x, y, size, "", cChar);
             }
             shapesList.push_back({shapeTipe, x, y, size, ID});
 
@@ -214,10 +217,10 @@ int main() {
         }
         else if (command == "shapes"){
             cout << "All shapes:\n";
-            cout << "Triangle: input x, y, height\n";
-            cout << "Circle: input x, y, radius\n";
-            cout << "Square: input x, y, lenght\n";
-            cout << "Line: input x, y, lenght\n";
+            cout << "Triangle: input x, y, height, fill/frame, colour\n";
+            cout << "Circle: input x, y, radius, fill/frame, colour\n";
+            cout << "Square: input x, y, lenght, fill/frame, colour\n";
+            cout << "Line: input x, y, lenght, fill/frame, colour\n";
         }
         else if (command == "list"){
             cout << "List of all added shapes:\n";
@@ -232,13 +235,13 @@ int main() {
                 board.clear();
                 for (const auto& shape: shapesList){
                     if (shape.name == "triangle") {
-                        triangle.draw(board, shape.x, shape.y, shape.z);
+                        triangle.draw(board, shape.x, shape.y, shape.z,  "", '*');
                     } else if (shape.name == "circle") {
-                        circle.draw(board, shape.x, shape.y, shape.z);
+                        circle.draw(board, shape.x, shape.y, shape.z,  "", '*');
                     } else if (shape.name == "square") {
-                        square.draw(board, shape.x, shape.y, shape.z);
+                        square.draw(board, shape.x, shape.y, shape.z,  "", '*');
                     } else if (shape.name == "line") {
-                        line.draw(board, shape.x, shape.y, shape.z);
+                        line.draw(board, shape.x, shape.y, shape.z,  "", '*');
                     }
                 }
             } else{
@@ -255,7 +258,9 @@ int main() {
     }
 }
 
-//add triangle 10 5 5
+//add triangle blue 10 5 5
 //add circle 10 10 5
 //add square 10 10 10
 // add line 10 10 10
+//add circle blue 10 10 5
+//add triangle blue 10 5 5
