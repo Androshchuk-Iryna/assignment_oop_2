@@ -9,8 +9,8 @@ const int BOARD_HEIGHT = 25;
 
 struct ShapeDate{
     string name;
-//    string colour;
-//    string filling;
+    string colour;
+    string filling;
     int x, y, z;
     int id;
 
@@ -92,23 +92,33 @@ class Triangle: public Shape{
 public:
     void draw(Board& board, int x, int y, int height, string fill, char colour) const override {
         if (height <= 0) return;
-        for (int i = 0; i < height; ++i) {
-            int leftMost = x - i;
-            int rightMost = x + i;
-            int posY = y + i;
+        if (fill == "fill"){
+            for (int i = 0; i < height; ++i) {
+                int leftMost = x - i;
+                int rightMost = x + i;
+                int posY = y + i;
 
-            if (posY < BOARD_HEIGHT) {
-                if (leftMost >= 0 && leftMost < BOARD_WIDTH)
-                    board.grid[posY][leftMost] = colour;
-                if (rightMost >= 0 && rightMost < BOARD_WIDTH && leftMost != rightMost)
-                    board.grid[posY][rightMost] = colour;
+                if (posY < BOARD_HEIGHT) {
+                    if (leftMost >= 0 && leftMost < BOARD_WIDTH)
+                        board.grid[posY][leftMost] = colour;
+                    if (rightMost >= 0 && rightMost < BOARD_WIDTH && leftMost != rightMost)
+                        board.grid[posY][rightMost] = colour;
+                }
+            }
+            for (int j = 0; j < 2 * height - 1; ++j) {
+                int baseX = x - height + 1 + j;
+                int baseY = y + height - 1;
+                if (baseX >= 0 && baseX < BOARD_WIDTH && baseY < BOARD_HEIGHT)
+                    board.grid[baseY][baseX] = colour;
             }
         }
-        for (int j = 0; j < 2 * height - 1; ++j) {
-            int baseX = x - height + 1 + j;
-            int baseY = y + height - 1;
-            if (baseX >= 0 && baseX < BOARD_WIDTH && baseY < BOARD_HEIGHT)
-                board.grid[baseY][baseX] = colour;
+        else if(fill == "frame"){
+            for (int i = 0; i < height; ++i) {
+                for (int j = x - i + 1; j < x + i; ++j) {
+                    if (y + i < BOARD_HEIGHT && j >= 0 && j < BOARD_WIDTH)
+                        board.grid[y + i][j] = colour;
+                }
+            }
         }
     }
 };
@@ -121,32 +131,54 @@ public:
 
         for (int i = 0; i <= 2 * radius; i++) {
             for (int j = 0; j <= 2 * radius; ++j) {
-                dist = sqrt((i - radius) * (i - radius) +
-                            (j - radius) * (j - radius));
+                dist = sqrt((i - radius) * (i - radius) + (j - radius) * (j - radius));
 
-                if (dist > radius - 0.5 && dist < radius + 0.5) {
-                    int boardX = x - radius + j;
-                    int boardY = y - radius + i;
-                    if (boardX >= 0 && boardX < BOARD_WIDTH && boardY >= 0 && boardY < BOARD_HEIGHT) {
-                        board.grid[boardY][boardX] = '*';
+                if (fill == "frame") {
+                    if (dist <= radius + 0.5) {
+                        int boardX = x - radius + j;
+                        int boardY = y - radius + i;
+                        if (boardX >= 0 && boardX < BOARD_WIDTH && boardY >= 0 && boardY < BOARD_HEIGHT) {
+                            board.grid[boardY][boardX] = colour;
+                        }
+                    }
+                }
+                else if(fill == "fill"){
+                    if (dist > radius - 0.5 && dist < radius + 0.5) {
+                        int boardX = x - radius + j;
+                        int boardY = y - radius + i;
+                        if (boardX >= 0 && boardX < BOARD_WIDTH && boardY >= 0 && boardY < BOARD_HEIGHT) {
+                            board.grid[boardY][boardX] = colour;
+                        }
                     }
                 }
             }
         }
     }
 };
+
 class Square: public Shape{
 public:
     void draw(Board& board, int x, int y, int lenght, string fill, char colour) const override {
         if (lenght <= 0) return;
-        for (int i = 0; i < lenght; ++i) {
-            if (x + i < BOARD_WIDTH && y + i < BOARD_HEIGHT) {
-                board.grid[y][x + i] = '*';
-                board.grid[y + lenght - 1][x + i] = '*';
+
+        if (fill == "fill"){
+            for (int i = 0; i < lenght; ++i) {
+                if (x + i < BOARD_WIDTH && y + i < BOARD_HEIGHT) {
+                    board.grid[y][x + i] = colour;
+                    board.grid[y + lenght - 1][x + i] = colour;
+                }
+                if (y + i < BOARD_HEIGHT && x + i < BOARD_WIDTH) {
+                    board.grid[y + i][x] = colour;
+                    board.grid[y + i][x + lenght - 1] = colour;
+                }
             }
-            if (y + i < BOARD_HEIGHT && x + i < BOARD_WIDTH) {
-                board.grid[y + i][x] = '*';
-                board.grid[y + i][x + lenght - 1] = '*';
+        }
+        else if(fill == "frame"){
+            for (int i = 1; i < lenght - 1; ++i) {
+                for (int j = 1; j < lenght - 1; ++j) {
+                    if (y + i < BOARD_HEIGHT && x + j < BOARD_WIDTH)
+                        board.grid[y + i][x + j] = colour;
+                }
             }
         }
     }
@@ -158,7 +190,7 @@ public:
         if (lenght <= 0) return;
         for (int i = 0; i < lenght; ++i){
             if (x + i < BOARD_WIDTH && y < BOARD_HEIGHT) {
-                board.grid[y+i][x + i] = '*';
+                board.grid[y+i][x + i] = colour;
             }
         }
     }
@@ -180,6 +212,7 @@ int main() {
     string shapeTipe;
     string colour;
     string command;
+    string fill;
 
     while (true){
         cout << "Enter command (add, draw, clear, save, load, shapes, list, undo, exit): ";
@@ -187,22 +220,21 @@ int main() {
 
         if (command == "add"){
             ID++;
-            cin >> shapeTipe >> colour >> x >> y >> size;
+            cin >> shapeTipe >> colour >> x >> y >> size >> fill;
             char cChar = colour[0];
             if (shapeTipe == "triangle"){
-                triangle.draw(board, x, y, size, "", cChar);
+                triangle.draw(board, x, y, size, fill, cChar);
             }
             else if (shapeTipe == "circle"){
-                circle.draw(board, x, y, size, "", cChar);
+                circle.draw(board, x, y, size, fill, cChar);
             }
             else if (shapeTipe == "square"){
-                square.draw(board, x, y, size, "", cChar);
+                square.draw(board, x, y, size, fill, cChar);
             }
             else if (shapeTipe == "line"){
-                line.draw(board, x, y, size, "", cChar);
+                line.draw(board, x, y, size, fill, cChar);
             }
-            shapesList.push_back({shapeTipe, x, y, size, ID});
-
+            shapesList.push_back({shapeTipe, colour, fill, x, y, size, ID});
         }
         else if (command == "draw"){
             board.print();
@@ -226,7 +258,8 @@ int main() {
             cout << "List of all added shapes:\n";
             for (const auto& shape : shapesList) {
                 cout << "ID: " << shape.id << ", Shape: " << shape.name
-                     << ", X: " << shape.x << ", Y: " << shape.y << ", Size: " << shape.z << "\n";
+                     << ", X: " << shape.x << ", Y: " << shape.y << ", Size: " << shape.z
+                     <<", Colour: "<< shape.colour << ", Fill/Frame: " << shape.filling<<"\n";
             }
         }
         else if(command == "undo"){
@@ -263,4 +296,6 @@ int main() {
 //add square 10 10 10
 // add line 10 10 10
 //add circle blue 10 10 5
-//add triangle blue 10 5 5
+//add triangle red 10 5 5 frame
+//add circle red 10 10 5 frame
+//add square blue 10 10 10 frame
