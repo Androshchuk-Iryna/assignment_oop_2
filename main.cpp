@@ -35,6 +35,9 @@ struct Board{
             }
         }
     }
+    void draw(){
+
+    }
 };
 
 class fileMangnment{
@@ -195,7 +198,36 @@ public:
         }
     }
 };
+class ShapeFactory{
+public:
+    void selectShape(const vector<ShapeDate>& shapesList, int id = 0){
+        if (id != 0) {
+            for (const auto& shape : shapesList) {
+                if (shape.id == id) {
+                    cout << "Shape ID: " << shape.id << ", Name: " << shape.name
+                         << ", Colour: " << shape.colour << ", X: " << shape.x
+                         << ", Y: " << shape.y << ", Size: " << shape.z
+                         << ", Filling: " << shape.filling << "\n";
+                }
+                else{
+                    cout << "Shape was not found\n";
+                }
+            }
+        }
+    }
+    void editShape(vector<ShapeDate>& shapesList, int id, int newSize){
+        for (auto& shape : shapesList) {
+            if (shape.id == id) {
+                shape.z = newSize;
+                cout << "Shape updated successfully." << endl;
+                return;
+            }
+        }
+        cout << "Shape not found." << endl;
+    }
 
+
+};
 
 
 int main() {
@@ -268,19 +300,82 @@ int main() {
                 board.clear();
                 for (const auto& shape: shapesList){
                     if (shape.name == "triangle") {
-                        triangle.draw(board, shape.x, shape.y, shape.z,  "", '*');
+                        triangle.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
                     } else if (shape.name == "circle") {
-                        circle.draw(board, shape.x, shape.y, shape.z,  "", '*');
+                        circle.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
                     } else if (shape.name == "square") {
-                        square.draw(board, shape.x, shape.y, shape.z,  "", '*');
+                        square.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
                     } else if (shape.name == "line") {
-                        line.draw(board, shape.x, shape.y, shape.z,  "", '*');
+                        line.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
                     }
                 }
             } else{
-                cout << "no shapes to delet";
+                cout << "no shapes to delete";
             }
         }
+        else if (command == "select"){
+            int id;
+            cout << "Select an id ";
+            cin >> id;
+        }
+        else if (command == "remove") {
+            int id;
+            cout << "Enter the id of the shape to remove: ";
+            cin >> id;
+            if(!shapesList.empty()){
+                for (int i = 0; i < shapesList.size(); ++i) {
+                    if (shapesList[i].id == id) {
+                        shapesList.erase(shapesList.begin() + i);
+                    }
+                }
+                board.clear();
+                for (const auto& shape: shapesList){
+                    if (shape.name == "triangle") {
+                        triangle.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
+                    } else if (shape.name == "circle") {
+                        circle.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
+                    } else if (shape.name == "square") {
+                        square.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
+                    } else if (shape.name == "line") {
+                        line.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
+                    }
+                }
+            } else{
+                cout << "no shapes to delete";
+            }
+        }
+        else if (command == "edit") {
+            int id, newSize;
+
+            cout << "Enter the id of the shape to edit and new size: ";
+            cin >> id >> newSize;
+
+            if (!shapesList.empty()) {
+
+                for (int i = 0; i < shapesList.size(); ++i) {
+                    if (shapesList[i].id == id) {
+
+                        if (newSize <= BOARD_WIDTH && newSize <= BOARD_HEIGHT) {
+                            if (shapesList[i].name == "triangle") {
+                                shapesList[i].z = newSize;
+                            } else if (shapesList[i].name == "square") {
+                                shapesList[i].z = newSize;
+                            } else if (shapesList[i].name == "circle") {
+                                shapesList[i].z = newSize;
+                            } else if (shapesList[i].name == "line") {
+                                shapesList[i].z = newSize;
+                            }
+
+                            cout << "Shape updated successfully." << endl;
+                        } else {
+                            cout << "Error: shape will go out of the board." << endl;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
         else if (command == "exit") {
             return 0;
         }
@@ -291,7 +386,7 @@ int main() {
     }
 }
 
-//add triangle blue 10 5 5
+//add triangle 10 5 5
 //add circle 10 10 5
 //add square 10 10 10
 // add line 10 10 10
