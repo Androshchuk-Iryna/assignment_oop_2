@@ -234,18 +234,23 @@ public:
 
 
     void selectShape(const vector<ShapeDate>& shapesList, int id) {
+        bool found = false;
+
         for (const auto& shape : shapesList) {
             if (shape.id == id) {
+                found = true;
                 Id = id;
                 cout << "Shape ID: " << shape.id << ", Name: " << shape.name
                      << ", Colour: " << shape.colour << ", X: " << shape.x
                      << ", Y: " << shape.y << ", Size: " << shape.z
                      << ", Filling: " << shape.filling << "\n";
+                break;
             }
-            else{
-                cout << "Shape not found.\n";
-                Id = -1;
-            }
+        }
+
+        if (!found) {
+            cout << "Shape not found.\n";
+            Id = -1;
         }
     }
 
@@ -440,6 +445,6 @@ int main() {
 //add square 10 10 10
 // add line 10 10 10
 //add circle blue 10 10 5
-//add triangle red 10 5 5 frame
-//add circle red 10 10 5 frame
+//add triangle red 10 5 5 fill
+//add circle red 10 10 5 fill
 //add square blue 10 10 10 frame
