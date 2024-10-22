@@ -7,6 +7,33 @@ using namespace std;
 const int BOARD_WIDTH = 80;
 const int BOARD_HEIGHT = 25;
 
+struct Board;
+
+class Shape {
+public:
+    virtual void draw(Board& board, int x, int y, int size, string fill, char colour) const = 0;
+};
+
+class Triangle : public Shape {
+public:
+    void draw(Board& board, int x, int y, int height, string fill, char colour) const override;
+};
+
+class Circle : public Shape {
+public:
+    void draw(Board& board, int x, int y, int radius, string fill, char colour) const override;
+};
+
+class Square : public Shape {
+public:
+    void draw(Board& board, int x, int y, int length, string fill, char colour) const override;
+};
+
+class Line : public Shape {
+public:
+    void draw(Board& board, int x, int y, int length, string fill, char colour) const override;
+};
+
 struct ShapeDate{
     string name;
     string colour;
@@ -17,6 +44,10 @@ struct ShapeDate{
 };
 
 struct Board{
+    Triangle triangle;
+    Circle circle;
+    Square square;
+    Line line;
     vector<vector<char>> grid;
     Board() : grid(BOARD_HEIGHT, vector<char>(BOARD_WIDTH, ' ')) {}
 
@@ -35,8 +66,18 @@ struct Board{
             }
         }
     }
-    void draw(){
+    void draw(const string& shapeType, int x, int y, int size, const string& fill, const string& colour) {
+        char cChar = colour[0];
 
+        if (shapeType == "triangle") {
+            triangle.draw(*this, x, y, size, fill, cChar);
+        } else if (shapeType == "circle") {
+            circle.draw(*this, x, y, size, fill, cChar);
+        } else if (shapeType == "square") {
+            square.draw(*this, x, y, size, fill, cChar);
+        } else if (shapeType == "line") {
+            line.draw(*this, x, y, size, fill, cChar);
+        }
     }
 };
 
@@ -86,156 +127,202 @@ public:
 };
 
 
-class Shape{
-public:
-    virtual void draw(Board& board, int x, int y, int size, string fill, char colour) const = 0;
-};
+void Triangle::draw(Board& board, int x, int y, int height, string fill, char colour) const {
+    if (height <= 0) return;
+    if (fill == "fill"){
+        for (int i = 0; i < height; ++i) {
+            int leftMost = x - i;
+            int rightMost = x + i;
+            int posY = y + i;
 
-class Triangle: public Shape{
-public:
-    void draw(Board& board, int x, int y, int height, string fill, char colour) const override {
-        if (height <= 0) return;
-        if (fill == "fill"){
-            for (int i = 0; i < height; ++i) {
-                int leftMost = x - i;
-                int rightMost = x + i;
-                int posY = y + i;
-
-                if (posY < BOARD_HEIGHT) {
-                    if (leftMost >= 0 && leftMost < BOARD_WIDTH)
-                        board.grid[posY][leftMost] = colour;
-                    if (rightMost >= 0 && rightMost < BOARD_WIDTH && leftMost != rightMost)
-                        board.grid[posY][rightMost] = colour;
-                }
-            }
-            for (int j = 0; j < 2 * height - 1; ++j) {
-                int baseX = x - height + 1 + j;
-                int baseY = y + height - 1;
-                if (baseX >= 0 && baseX < BOARD_WIDTH && baseY < BOARD_HEIGHT)
-                    board.grid[baseY][baseX] = colour;
+            if (posY < BOARD_HEIGHT) {
+                if (leftMost >= 0 && leftMost < BOARD_WIDTH)
+                    board.grid[posY][leftMost] = colour;
+                if (rightMost >= 0 && rightMost < BOARD_WIDTH && leftMost != rightMost)
+                    board.grid[posY][rightMost] = colour;
             }
         }
-        else if(fill == "frame"){
-            for (int i = 0; i < height; ++i) {
-                for (int j = x - i + 1; j < x + i; ++j) {
-                    if (y + i < BOARD_HEIGHT && j >= 0 && j < BOARD_WIDTH)
-                        board.grid[y + i][j] = colour;
-                }
+        for (int j = 0; j < 2 * height - 1; ++j) {
+            int baseX = x - height + 1 + j;
+            int baseY = y + height - 1;
+            if (baseX >= 0 && baseX < BOARD_WIDTH && baseY < BOARD_HEIGHT)
+                board.grid[baseY][baseX] = colour;
+        }
+    }
+    else if(fill == "frame"){
+        for (int i = 0; i < height; ++i) {
+            for (int j = x - i + 1; j < x + i; ++j) {
+                if (y + i < BOARD_HEIGHT && j >= 0 && j < BOARD_WIDTH)
+                    board.grid[y + i][j] = colour;
             }
         }
     }
-};
+}
 
-class Circle: public Shape{
-public:
-    void draw(Board& board, int x, int y, int radius, string fill, char colour) const override {
-        if (radius <= 0) return;
-        float dist;
+void Circle::draw(Board& board, int x, int y, int radius, string fill, char colour) const {
+    if (radius <= 0) return;
+    float dist;
 
-        for (int i = 0; i <= 2 * radius; i++) {
-            for (int j = 0; j <= 2 * radius; ++j) {
-                dist = sqrt((i - radius) * (i - radius) + (j - radius) * (j - radius));
+    for (int i = 0; i <= 2 * radius; i++) {
+        for (int j = 0; j <= 2 * radius; ++j) {
+            dist = sqrt((i - radius) * (i - radius) + (j - radius) * (j - radius));
 
-                if (fill == "frame") {
-                    if (dist <= radius + 0.5) {
-                        int boardX = x - radius + j;
-                        int boardY = y - radius + i;
-                        if (boardX >= 0 && boardX < BOARD_WIDTH && boardY >= 0 && boardY < BOARD_HEIGHT) {
-                            board.grid[boardY][boardX] = colour;
-                        }
+            if (fill == "frame") {
+                if (dist <= radius + 0.5) {
+                    int boardX = x - radius + j;
+                    int boardY = y - radius + i;
+                    if (boardX >= 0 && boardX < BOARD_WIDTH && boardY >= 0 && boardY < BOARD_HEIGHT) {
+                        board.grid[boardY][boardX] = colour;
                     }
                 }
-                else if(fill == "fill"){
-                    if (dist > radius - 0.5 && dist < radius + 0.5) {
-                        int boardX = x - radius + j;
-                        int boardY = y - radius + i;
-                        if (boardX >= 0 && boardX < BOARD_WIDTH && boardY >= 0 && boardY < BOARD_HEIGHT) {
-                            board.grid[boardY][boardX] = colour;
-                        }
+            }
+            else if(fill == "fill"){
+                if (dist > radius - 0.5 && dist < radius + 0.5) {
+                    int boardX = x - radius + j;
+                    int boardY = y - radius + i;
+                    if (boardX >= 0 && boardX < BOARD_WIDTH && boardY >= 0 && boardY < BOARD_HEIGHT) {
+                        board.grid[boardY][boardX] = colour;
                     }
                 }
             }
         }
     }
-};
+}
 
-class Square: public Shape{
-public:
-    void draw(Board& board, int x, int y, int lenght, string fill, char colour) const override {
-        if (lenght <= 0) return;
+void Square::draw(Board& board, int x, int y, int lenght, string fill, char colour) const {
+    if (lenght <= 0) return;
 
-        if (fill == "fill"){
-            for (int i = 0; i < lenght; ++i) {
-                if (x + i < BOARD_WIDTH && y + i < BOARD_HEIGHT) {
-                    board.grid[y][x + i] = colour;
-                    board.grid[y + lenght - 1][x + i] = colour;
-                }
-                if (y + i < BOARD_HEIGHT && x + i < BOARD_WIDTH) {
-                    board.grid[y + i][x] = colour;
-                    board.grid[y + i][x + lenght - 1] = colour;
-                }
+    if (fill == "fill"){
+        for (int i = 0; i < lenght; ++i) {
+            if (x + i < BOARD_WIDTH && y + i < BOARD_HEIGHT) {
+                board.grid[y][x + i] = colour;
+                board.grid[y + lenght - 1][x + i] = colour;
             }
-        }
-        else if(fill == "frame"){
-            for (int i = 1; i < lenght - 1; ++i) {
-                for (int j = 1; j < lenght - 1; ++j) {
-                    if (y + i < BOARD_HEIGHT && x + j < BOARD_WIDTH)
-                        board.grid[y + i][x + j] = colour;
-                }
+            if (y + i < BOARD_HEIGHT && x + i < BOARD_WIDTH) {
+                board.grid[y + i][x] = colour;
+                board.grid[y + i][x + lenght - 1] = colour;
             }
         }
     }
+    else if(fill == "frame"){
+        for (int i = 1; i < lenght - 1; ++i) {
+            for (int j = 1; j < lenght - 1; ++j) {
+                if (y + i < BOARD_HEIGHT && x + j < BOARD_WIDTH)
+                    board.grid[y + i][x + j] = colour;
+            }
+        }
+    }
+}
 
-};
-class Line: public Shape{
-public:
-    void draw(Board& board, int x, int y, int lenght, string fill, char colour) const override {
-        if (lenght <= 0) return;
-        for (int i = 0; i < lenght; ++i){
-            if (x + i < BOARD_WIDTH && y < BOARD_HEIGHT) {
-                board.grid[y+i][x + i] = colour;
-            }
+void Line::draw(Board& board, int x, int y, int lenght, string fill, char colour) const {
+    if (lenght <= 0) return;
+    for (int i = 0; i < lenght; ++i){
+        if (x + i < BOARD_WIDTH && y < BOARD_HEIGHT) {
+            board.grid[y+i][x + i] = colour;
         }
-    }
-};
-class ShapeFactory{
+    }}
+class ShapeFactory {
+    Board& board;
+    int Id = -1;
+
 public:
-    void selectShape(const vector<ShapeDate>& shapesList, int id = 0){
-        if (id != 0) {
-            for (const auto& shape : shapesList) {
-                if (shape.id == id) {
-                    cout << "Shape ID: " << shape.id << ", Name: " << shape.name
-                         << ", Colour: " << shape.colour << ", X: " << shape.x
-                         << ", Y: " << shape.y << ", Size: " << shape.z
-                         << ", Filling: " << shape.filling << "\n";
-                }
-                else{
-                    cout << "Shape was not found\n";
-                }
-            }
-        }
-    }
-    void editShape(vector<ShapeDate>& shapesList, int id, int newSize){
-        for (auto& shape : shapesList) {
+    ShapeFactory(Board& b) : board(b) {}
+
+    void selectShape(const vector<ShapeDate>& shapesList, int id) {
+        for (const auto& shape : shapesList) {
             if (shape.id == id) {
+                Id = id;
+                cout << "Shape ID: " << shape.id << ", Name: " << shape.name
+                     << ", Colour: " << shape.colour << ", X: " << shape.x
+                     << ", Y: " << shape.y << ", Size: " << shape.z
+                     << ", Filling: " << shape.filling << "\n";
+            }
+            else{
+                cout << "Shape not found.\n";
+                Id = -1;
+            }
+        }
+    }
+
+    void editShape(vector<ShapeDate>& shapesList, int newSize) {
+        if (Id == -1) {
+            cout << "No shape selected for editing.\n";
+            return;
+        }
+
+        for (auto& shape : shapesList) {
+            if (shape.id == Id) {
                 shape.z = newSize;
-                cout << "Shape updated successfully." << endl;
+                cout << "Shape updated successfully.\n";
+                Id = -1;
+                board.clear();
+                for (const auto& s : shapesList) {
+                    board.draw(s.name, s.x, s.y, s.z, s.filling, s.colour);
+                }
                 return;
             }
         }
-        cout << "Shape not found." << endl;
+        cout << "Shape not found.\n";
     }
 
+    void removeShape(vector<ShapeDate>& shapesList) {
+        if (Id == -1) {
+            cout << "No shape selected for removal.\n";
+            return;
+        }
 
+        if (!shapesList.empty()) {
+            for (int i = 0; i < shapesList.size(); ++i) {
+                if (shapesList[i].id == Id) {
+                    shapesList.erase(shapesList.begin() + i);
+                    cout << "Shape removed successfully.\n";
+                    Id = -1;
+                    board.clear();
+                    for (const auto& shape : shapesList) {
+                        board.draw(shape.name, shape.x, shape.y, shape.z, shape.filling, shape.colour);
+                    }
+                    return;
+                }
+            }
+            cout << "Shape not found.\n";
+        } else {
+            cout << "Shape list is empty.\n";
+        }
+    }
+    void paint(vector<ShapeDate>& shapesList, char newColour) {
+        if (Id == -1) {
+            cout << "No shape selected for editing.\n";
+            return;
+        }
+        for (auto& shape : shapesList) {
+            if (shape.id == Id) {
+                shape.colour = newColour;
+                cout << "Shape painted successfully.\n";
+                Id = -1;
+                board.clear();
+                for (const auto& s : shapesList) {
+                    board.draw(s.name, s.x, s.y, s.z, s.filling, s.colour);
+                }
+                return;
+            }
+        }
+        cout << "Shape not found.\n";
+    }
+    void move(vector<ShapeDate>& shapesList, char newColour){
+        if (Id == -1) {
+            cout << "No shape selected for editing.\n";
+            return;
+        }
+
+
+    }
 };
+
 
 
 int main() {
     Board board;
-    Triangle triangle;
-    Circle circle;
-    Square square;
-    Line line;
+    ShapeFactory sf(board);
 
     vector<ShapeDate> shapesList;
     int ID = 0;
@@ -253,19 +340,7 @@ int main() {
         if (command == "add"){
             ID++;
             cin >> shapeTipe >> colour >> x >> y >> size >> fill;
-            char cChar = colour[0];
-            if (shapeTipe == "triangle"){
-                triangle.draw(board, x, y, size, fill, cChar);
-            }
-            else if (shapeTipe == "circle"){
-                circle.draw(board, x, y, size, fill, cChar);
-            }
-            else if (shapeTipe == "square"){
-                square.draw(board, x, y, size, fill, cChar);
-            }
-            else if (shapeTipe == "line"){
-                line.draw(board, x, y, size, fill, cChar);
-            }
+            board.draw(shapeTipe, x, y, size, fill, colour);
             shapesList.push_back({shapeTipe, colour, fill, x, y, size, ID});
         }
         else if (command == "draw"){
@@ -295,87 +370,38 @@ int main() {
             }
         }
         else if(command == "undo"){
-            if(!shapesList.empty()){
+            if (!shapesList.empty()) {
                 shapesList.pop_back();
                 board.clear();
-                for (const auto& shape: shapesList){
-                    if (shape.name == "triangle") {
-                        triangle.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
-                    } else if (shape.name == "circle") {
-                        circle.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
-                    } else if (shape.name == "square") {
-                        square.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
-                    } else if (shape.name == "line") {
-                        line.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
-                    }
+                for (const auto& shape : shapesList) {
+                    board.draw(shape.name, shape.x, shape.y, shape.z, shape.filling, shape.colour);
                 }
             } else{
                 cout << "no shapes to delete";
             }
-        }
-        else if (command == "select"){
+        } else if (command == "select") {
             int id;
-            cout << "Select an id ";
+            cout << "Enter the ID of the shape to select: ";
             cin >> id;
+            sf.selectShape(shapesList, id);
+        } else if (command == "remove") {
+            sf.removeShape(shapesList);
+        } else if (command == "edit") {
+            int newSize;
+            cout << "Enter the new size for the selected shape: ";
+            cin >> newSize;
+            sf.editShape(shapesList, newSize);
         }
-        else if (command == "remove") {
-            int id;
-            cout << "Enter the id of the shape to remove: ";
-            cin >> id;
-            if(!shapesList.empty()){
-                for (int i = 0; i < shapesList.size(); ++i) {
-                    if (shapesList[i].id == id) {
-                        shapesList.erase(shapesList.begin() + i);
-                    }
-                }
-                board.clear();
-                for (const auto& shape: shapesList){
-                    if (shape.name == "triangle") {
-                        triangle.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
-                    } else if (shape.name == "circle") {
-                        circle.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
-                    } else if (shape.name == "square") {
-                        square.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
-                    } else if (shape.name == "line") {
-                        line.draw(board, shape.x, shape.y, shape.z,  shape.filling, '*');
-                    }
-                }
-            } else{
-                cout << "no shapes to delete";
-            }
+        else if(command == "paint"){
+            char newColour;
+            cout << "Enter the new colour for the selected shape: ";
+            cin >> newColour;
+            sf.paint(shapesList, newColour);
+
         }
-        else if (command == "edit") {
-            int id, newSize;
+        else if(command == "move"){
 
-            cout << "Enter the id of the shape to edit and new size: ";
-            cin >> id >> newSize;
-
-            if (!shapesList.empty()) {
-
-                for (int i = 0; i < shapesList.size(); ++i) {
-                    if (shapesList[i].id == id) {
-
-                        if (newSize <= BOARD_WIDTH && newSize <= BOARD_HEIGHT) {
-                            if (shapesList[i].name == "triangle") {
-                                shapesList[i].z = newSize;
-                            } else if (shapesList[i].name == "square") {
-                                shapesList[i].z = newSize;
-                            } else if (shapesList[i].name == "circle") {
-                                shapesList[i].z = newSize;
-                            } else if (shapesList[i].name == "line") {
-                                shapesList[i].z = newSize;
-                            }
-
-                            cout << "Shape updated successfully." << endl;
-                        } else {
-                            cout << "Error: shape will go out of the board." << endl;
-                        }
-                        break;
-                    }
-                }
-            }
         }
-
         else if (command == "exit") {
             return 0;
         }
