@@ -308,10 +308,22 @@ public:
         }
         cout << "Shape not found.\n";
     }
-    void move(vector<ShapeDate>& shapesList, char newColour){
+    void move(vector<ShapeDate>& shapesList, int newX, int newY) {
         if (Id == -1) {
             cout << "No shape selected for editing.\n";
             return;
+        }
+        for (auto& shape : shapesList) {
+            if (shape.id == Id) {
+                shape.x = newX;
+                shape.y = newY;
+                cout << "Shape moved successfully.\n";
+                Id = -1;
+                board.clear();
+                for (const auto& s : shapesList) {
+                    board.draw(s.name, s.x, s.y, s.z, s.filling, s.colour);
+                }
+            }
         }
 
 
@@ -400,7 +412,10 @@ int main() {
 
         }
         else if(command == "move"){
-
+            int newX, newY;
+            cout << "Enter the new x and y coordinates for the selected shape: ";
+            cin >> newX >> newY;
+            sf.move(shapesList, newX, newY);
         }
         else if (command == "exit") {
             return 0;
