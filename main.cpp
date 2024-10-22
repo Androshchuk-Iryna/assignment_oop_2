@@ -220,13 +220,18 @@ void Line::draw(Board& board, int x, int y, int lenght, string fill, char colour
         if (x + i < BOARD_WIDTH && y < BOARD_HEIGHT) {
             board.grid[y+i][x + i] = colour;
         }
-    }}
+    }
+}
+
+
 class ShapeFactory {
     Board& board;
     int Id = -1;
 
 public:
+
     ShapeFactory(Board& b) : board(b) {}
+
 
     void selectShape(const vector<ShapeDate>& shapesList, int id) {
         for (const auto& shape : shapesList) {
@@ -247,6 +252,10 @@ public:
     void editShape(vector<ShapeDate>& shapesList, int newSize) {
         if (Id == -1) {
             cout << "No shape selected for editing.\n";
+            return;
+        }
+        if (newSize >= BOARD_WIDTH || newSize >= BOARD_HEIGHT) {
+            cout << "Shape will go out of the board\n";
             return;
         }
 
@@ -331,7 +340,6 @@ public:
 };
 
 
-
 int main() {
     Board board;
     ShapeFactory sf(board);
@@ -346,7 +354,7 @@ int main() {
     string fill;
 
     while (true){
-        cout << "Enter command (add, draw, clear, save, load, shapes, list, undo, exit): ";
+        cout << "Enter command (add, draw, clear, save, load, shapes, list, undo, select, edit, remove, paint, move, exit): ";
         cin >> command;
 
         if (command == "add"){
